@@ -32,6 +32,9 @@ syscfg.defs:
     MPU6050_OFB:
         description: 'MPU6050 is present'
         value : 0
+    MPU6050_OFB_I2C_NUM:
+        description: 'I2C interface used for MPU6050'
+        value: 0
     BNO055_OFB:
         description: 'BNO055 is present'
         value : 0
