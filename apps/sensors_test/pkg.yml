@@ -33,10 +33,10 @@ pkg.deps:
     - "@apache-mynewt-core/sys/log/modlog"
     - "@apache-mynewt-core/sys/stats/full"
     - "@apache-mynewt-core/hw/sensor/creator"
-    - "@apache-mynewt-core/sys/reboot"
+#    - "@apache-mynewt-core/sys/reboot"
     - "@apache-mynewt-core/sys/id"
-    - "@apache-mynewt-core/mgmt/imgmgr"
-    - "@apache-mynewt-core/test/flash_test"
+#    - "@apache-mynewt-core/mgmt/imgmgr"
+#    - "@apache-mynewt-core/test/flash_test"
     - "@apache-mynewt-core/test/i2c_scan"
 
 pkg.deps.SENSOR_OIC:
