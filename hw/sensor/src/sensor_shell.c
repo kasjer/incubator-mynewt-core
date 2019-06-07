@@ -267,10 +267,10 @@ sensor_shell_read_listener(struct sensor *sensor, void *arg, void *data,
     struct sensor_current_data *scud;
     char tmpstr[13];
 
-    console_printf("ts: [ secs: %ld usecs: %d cputime: %u ]\n",
-                   (long int)sensor->s_sts.st_ostv.tv_sec,
-                   (int)sensor->s_sts.st_ostv.tv_usec,
-                   (unsigned int)sensor->s_sts.st_cputime);
+//    console_printf("ts: [ secs: %ld usecs: %d cputime: %u ]\n",
+//                   (long int)sensor->s_sts.st_ostv.tv_sec,
+//                   (int)sensor->s_sts.st_ostv.tv_usec,
+//                   (unsigned int)sensor->s_sts.st_cputime);
 
     if (type == SENSOR_TYPE_ACCELEROMETER ||
         type == SENSOR_TYPE_LINEAR_ACCEL  ||
