@@ -100,6 +100,48 @@ static const struct sensor_driver adxl345_sensor_driver = {
      .sd_clear_high_trigger_thresh = adxl345_sensor_clear_high_thresh
 };
 
+int
+adxl345_i2c_writelen(struct sensor_itf *itf, uint8_t reg, const uint8_t *value, uint8_t len)
+{
+    int rc;
+
+#if MYNEWT_VAL(BUS_DRIVER_PRESENT)
+    rc = bus_node_write(itf->si_dev, &reg, 1,
+                        os_time_ms_to_ticks32(MYNEWT_VAL(BUS_DEFAULT_TRANSACTION_TIMEOUT_MS)),
+                        BUS_F_NOSTOP);
+    if (rc == 0) {
+        rc = bus_node_simple_write(itf->si_dev, value, len);
+    }
+    if (rc) {
+        STATS_INC(g_adxl345stats, write_errors);
+    }
+#else
+    struct hal_i2c_master_data data_struct = {
+        .address = itf->si_addr,
+        .len = 1,
+        .buffer = &reg
+    };
+
+    rc = i2cn_master_write(itf->si_num, &data_struct, OS_TICKS_PER_SEC / 10, 0,
+                           MYNEWT_VAL(ADXL345_I2C_RETRIES));
+
+    if (rc == 0) {
+        data_struct.len = len;
+        data_struct.buffer = (uint8_t *)value;
+        rc = i2cn_master_write(itf->si_num, &data_struct, OS_TICKS_PER_SEC / 10, 1,
+                               0);
+    }
+    if (rc) {
+        ADXL345_LOG_ERROR(
+                    "Failed to write to 0x%02X:0x%02X with value 0x%02X\n",
+                    itf->si_addr, reg, value);
+        STATS_INC(g_adxl345stats, read_errors);
+    }
+#endif
+
+    return rc;
+}
+
 /**
  * Writes a single byte to the specified register using i2c
  *
@@ -1315,6 +1357,14 @@ adxl345_config(struct adxl345 *dev, struct adxl345_cfg *cfg)
     if (rc) {
         return rc;
     }
+
+#if MYNEWT_VAL(BUS_DRIVER_PRESENT)
+    uint8_t buf1[14];
+    uint8_t buf2[14];
+    adxl345_i2c_readlen(itf, ADXL345_THRESH_TAP, buf1, 14);
+    adxl345_i2c_writelen(itf, ADXL345_THRESH_TAP, buf1, 14);
+    adxl345_i2c_readlen(itf, ADXL345_THRESH_TAP, buf2, 14);
+#endif
 
     dev->cfg.mask = cfg->mask;
 
