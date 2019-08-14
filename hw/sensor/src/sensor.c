@@ -2239,3 +2239,43 @@ sensor_reset(struct sensor *sensor)
     sensor_unlock(sensor);
     return rc;
 }
+
+#if MYNEWT_VAL(BUS_DRIVER_PRESENT)
+int
+sensor_create_i2c_device(struct bus_i2c_node *node, const char *name,
+                         const struct bus_i2c_node_cfg *i2c_cfg,
+                         void (* init_node_cb)(struct bus_node *, void *),
+                         struct sensor_itf *sensor_itf)
+{
+    struct bus_node_callbacks cbs = {
+        .init = init_node_cb,
+    };
+    int rc;
+
+    sensor_itf->si_dev = &node->bnode.odev;
+    bus_node_set_callbacks((struct os_dev *)node, &cbs);
+
+    rc = bus_i2c_node_create(name, node, i2c_cfg, sensor_itf);
+
+    return rc;
+}
+
+int
+sensor_create_spi_device(struct bus_spi_node *node, const char *name,
+                         const struct bus_spi_node_cfg *spi_cfg,
+                         void (* init_node_cb)(struct bus_node *, void *),
+                         struct sensor_itf *sensor_itf)
+{
+    struct bus_node_callbacks cbs = {
+        .init = init_node_cb,
+    };
+    int rc;
+
+    sensor_itf->si_dev = &node->bnode.odev;
+    bus_node_set_callbacks((struct os_dev *)node, &cbs);
+
+    rc = bus_spi_node_create(name, node, spi_cfg, sensor_itf);
+
+    return rc;
+}
+#endif

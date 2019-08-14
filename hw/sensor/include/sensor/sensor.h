@@ -1120,6 +1120,47 @@ sensor_mgr_put_read_evt(void *arg);
 int
 sensor_reset(struct sensor *sensor);
 
+#if MYNEWT_VAL(BUS_DRIVER_PRESENT)
+
+/**
+ * Helper function to create named i2c sensor device.
+ *
+ * This function is to be used by driver code.
+ *
+ * @param node The sensor device node
+ * @param name Then name of the device
+ * @param i2c_cfg I2C configuration
+ * @param init_node_cb Initialization function, as argument sensor_itf will be
+ *        passed.
+ * @param sensor_itf sensor interface
+ *
+ * @return 0 on success, non-zero on failure
+ */
+int sensor_create_i2c_device(struct bus_i2c_node *node, const char *name,
+                             const struct bus_i2c_node_cfg *i2c_cfg,
+                             void (* init_node_cb)(struct bus_node *, void *),
+                             struct sensor_itf *sensor_itf);
+
+/**
+ * Helper function to create named SPI sensor device.
+ *
+ * This function is to be used by driver code.
+ *
+ * @param node The sensor device node
+ * @param name Then name of the device
+ * @param spi_cfg SPI configuration
+ * @param init_node_cb Initialization function, as argument sensor_itf will be
+ *        passed.
+ * @param sensor_itf sensor interface
+ *
+ * @return 0 on success, non-zero on failure
+ */
+int sensor_create_spi_device(struct bus_spi_node *node, const char *name,
+                             const struct bus_spi_node_cfg *spi_cfg,
+                             void (* init_node_cb)(struct bus_node *, void *),
+                             struct sensor_itf *sensor_itf);
+#endif
+
 #if MYNEWT_VAL(SENSOR_CLI)
 /**
  * Convinience API to convert floats to strings,
