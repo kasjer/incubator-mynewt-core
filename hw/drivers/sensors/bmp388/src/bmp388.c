@@ -4053,10 +4053,8 @@ err:
 #if MYNEWT_VAL(BUS_DRIVER_PRESENT)
 
 static void
-init_node_cb(struct bus_node *bnode, void *arg)
+bmp388_node_init(struct bus_node *bnode, void *itf)
 {
-    struct sensor_itf *itf = arg;
-
     bmp388_init((struct os_dev *)bnode, itf);
 }
 
@@ -4066,17 +4064,12 @@ bmp388_create_i2c_sensor_dev(struct bus_i2c_node *node, const char *name,
                              struct sensor_itf *sensor_itf)
 {
     struct bmp388 *dev = (struct bmp388 *)node;
-    struct bus_node_callbacks cbs = {
-        .init = init_node_cb,
-    };
     int rc;
 
     dev->node_is_spi = false;
 
-    sensor_itf->si_dev = &node->bnode.odev;
-    bus_node_set_callbacks((struct os_dev *)node, &cbs);
-
-    rc = bus_i2c_node_create(name, node, i2c_cfg, sensor_itf);
+    rc = sensor_create_i2c_device(node ,name, i2c_cfg, bmp388_node_init,
+                                  sensor_itf);
 
     return rc;
 }
@@ -4087,17 +4080,12 @@ bmp388_create_spi_sensor_dev(struct bus_spi_node *node, const char *name,
                              struct sensor_itf *sensor_itf)
 {
     struct bmp388 *dev = (struct bmp388 *)node;
-    struct bus_node_callbacks cbs = {
-        .init = init_node_cb,
-    };
     int rc;
 
     dev->node_is_spi = true;
 
-    sensor_itf->si_dev = &node->bnode.odev;
-    bus_node_set_callbacks((struct os_dev *)node, &cbs);
-
-    rc = bus_spi_node_create(name, node, spi_cfg, sensor_itf);
+    rc = sensor_create_spi_device(node, name, spi_cfg, bmp388_node_init,
+                                  sensor_itf);
 
     return rc;
 }
