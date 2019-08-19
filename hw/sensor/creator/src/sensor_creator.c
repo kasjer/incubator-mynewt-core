@@ -436,13 +436,13 @@ static struct sensor_itf spi2c_0_itf_bma253 = {
             MYNEWT_VAL(BMA253_INT_CFG_ACTIVE)}
     },
 };
-#elif MYNEWT_VAL(I2C_0)
+#elif MYNEWT_VAL(I2C_1)
 static struct sensor_itf spi2c_0_itf_bma253 = {
     .si_type = SENSOR_ITF_I2C,
-    .si_num  = 0,
-    .si_addr = 0x18,
+    .si_num  = 1,
+    .si_addr = 0x19,
     .si_ints = {
-        { 12, MYNEWT_VAL(BMA253_INT_PIN_DEVICE),
+        { 1, MYNEWT_VAL(BMA253_INT_PIN_DEVICE),
             MYNEWT_VAL(BMA253_INT_CFG_ACTIVE)},
         { 24, MYNEWT_VAL(BMA253_INT2_PIN_DEVICE),
             MYNEWT_VAL(BMA253_INT_CFG_ACTIVE)}
