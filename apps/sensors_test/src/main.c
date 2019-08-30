@@ -355,6 +355,7 @@ task1_handler(void *arg)
     while (1) {
         t = os_sched_get_current_task();
         assert(t->t_func == task1_handler);
+#if 1
 
         ++g_task1_loops;
 
@@ -363,7 +364,18 @@ task1_handler(void *arg)
 
         /* Toggle the LED */
         (void)hal_gpio_toggle(g_led_pin);
-
+#else
+        static int i = 0;
+        int pin = i + MCU_GPIO_PORT0_PIN_COUNT;
+        hal_gpio_init_out(pin, 0);
+        for (int j = 0; j <= i; ++j) {
+            os_time_delay(1);
+            hal_gpio_write(pin, 1);
+            os_time_delay(1);
+            hal_gpio_write(pin, 0);
+        }
+        if (i < 19) i++; else i = 0;
+#endif
         /* Release semaphore to task 2 */
         os_sem_release(&g_test_sem);
     }
@@ -513,6 +525,7 @@ main(int argc, char **argv)
 #ifdef ARCH_sim
     mcu_sim_parse_args(argc, argv);
 #endif
+    *(uint8_t *)0x500000D8 = 0xC0;
     /* Initialize OS */
     sysinit();
 
