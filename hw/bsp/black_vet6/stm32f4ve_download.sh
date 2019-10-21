@@ -28,11 +28,17 @@
 #  - FLASH_OFFSET contains the flash offset to download to
 #  - BOOT_LOADER is set if downloading a bootloader
 
-. $CORE_PATH/hw/scripts/stlink.sh
+#. $CORE_PATH/hw/scripts/stlink.sh
+. $CORE_PATH/hw/scripts/jlink.sh
 
 if [ "$MFG_IMAGE" ]; then
     FLASH_OFFSET=0x08000000
 fi
 
+JLINK_DEV="stm32f407ve"
+
 common_file_to_load
-stlink_load
+jlink_load
+
+#common_file_to_load
+#stlink_load

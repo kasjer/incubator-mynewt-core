@@ -37,3 +37,14 @@ fi
 
 common_file_to_load
 stlink_load
+
+#. $CORE_PATH/hw/scripts/jlink.sh
+#
+#if [ "$MFG_IMAGE" ]; then
+#    FLASH_OFFSET=0x08000000
+#fi
+#
+#JLINK_DEV="STM32F103RB"
+#
+#common_file_to_load
+#jlink_load
