@@ -22,6 +22,14 @@ syscfg.defs:
         description: 'Total flash size in KB.'
         value: 128
 
+syscfg.defs.BUS_DRIVER_PRESENT:
+    BSP_FLASH_SPI_NAME:
+        description: 'SPIFLASH device name'
+        value: '"spiflash0"'
+    BSP_FLASH_SPI_BUS:
+        description: 'bus name SPIFLASH is connected to'
+        value: '"spi0"'
+
 syscfg.vals:
     REBOOT_LOG_FLASH_AREA: FLASH_AREA_REBOOT_LOG
     CONFIG_FCB_FLASH_AREA: FLASH_AREA_NFFS
