@@ -256,6 +256,9 @@ struct max3107_dev {
     uint8_t tx_buf_count;
 };
 
+int max3107_write_regs(struct max3107_dev *dev, uint8_t addr, const uint8_t *buf, uint32_t size);
+int max3107_read_regs(struct max3107_dev *dev, uint8_t addr, void *buf, uint32_t size);
+
 #ifdef __cplusplus
 }
 #endif
