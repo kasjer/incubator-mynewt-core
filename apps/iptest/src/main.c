@@ -37,6 +37,8 @@
 #include <assert.h>
 #include <string.h>
 #include <id/id.h>
+#include <lwip/ip.h>
+#include <lwip/dhcp.h>
 
 #if MYNEWT_VAL(BUILD_WITH_OIC)
 #include <oic/oc_api.h>
@@ -63,14 +65,79 @@ static const oc_handler_t omgr_oc_handler = {
 };
 #endif
 
+int echo = 1;
+bool writable;
+int readable;
+
 static void net_test_readable(void *arg, int err)
 {
+#if 1
+    struct mn_sockaddr_in sin;
+    struct os_mbuf *m;
+    int rc;
+    (void)rc;
+
+    hal_gpio_write(MCU_GPIO_PORTE(0), 1);
+    hal_gpio_write(MCU_GPIO_PORTE(0), 0);
+    if (err == MN_ECONNABORTED) {
+        if (net_test_socket2) {
+            mn_close(net_test_socket2);
+            net_test_socket2 = NULL;
+            console_printf("Connection terminated\n");
+        }
+    }
+    else if (echo != 0 && err == 0 && net_test_socket2) {
+#if 1
+        console_printf("r %s writable\n", writable ? "" : "not");
+        if (!writable) {
+            readable++;
+        } else {
+            rc = mn_recvfrom(net_test_socket2, &m, (struct mn_sockaddr *)&sin);
+            if (rc == 0) {
+                writable = false;
+                rc = mn_sendto(net_test_socket2, m, NULL);
+                console_printf("sending %d, rc = %d\n", (int)(OS_MBUF_PKTHDR(m)->omp_len), rc);
+            } else {
+                console_printf("mn_recvfrom failed, rc = %d\n", rc);
+            }
+        }
+#else
+        rc = mn_recvfrom(net_test_socket2, &m, (struct mn_sockaddr *)&sin);
+        console_printf("r %d %d\n", (int)(OS_MBUF_PKTHDR(m)->omp_len), err);//
+        os_mbuf_free_chain(m);
+#endif
+    } else {
+        console_printf("net_test_readable %x - %d\n", (int)arg, err);//
+    }
+#else
     console_printf("net_test_readable %x - %d\n", (int)arg, err);
+#endif
 }
 
 static void net_test_writable(void *arg, int err)
 {
+    struct mn_sockaddr_in sin;
+    struct os_mbuf *m;
+    int rc;
+
+#if 0
     console_printf("net_test_writable %x - %d\n", (int)arg, err);
+#else
+    console_out('w');
+    console_out('\n');
+    writable = true;
+    if (readable) {
+        rc = mn_recvfrom(net_test_socket2, &m, (struct mn_sockaddr *)&sin);
+        readable--;
+        if (rc == 0) {
+            writable = false;
+            rc = mn_sendto(net_test_socket2, m, NULL);
+            console_printf("Sending back %d bytes, rc = %d\n", (int)(OS_MBUF_PKTHDR(m)->omp_len), rc);
+        } else {
+            console_printf("mn_recvfrom 2 failed, rc = %d\n", rc);
+        }
+    }
+#endif
 }
 
 static const union mn_socket_cb net_test_cbs = {
@@ -83,6 +150,7 @@ static int net_test_newconn(void *arg, struct mn_socket *new)
     console_printf("net_test_newconn %x - %x\n", (int)arg, (int)new);
     mn_socket_set_cbs(new, NULL, &net_test_cbs);
     net_test_socket2 = new;
+    writable = true;
     return 0;
 }
 
@@ -150,9 +218,11 @@ net_cli(int argc, char **argv)
         rc = mn_listen(net_test_socket, 2);
         console_printf("mn_listen() = %d\n", rc);
     } else if (!strcmp(argv[1], "close")) {
-        rc = mn_close(net_test_socket);
-        console_printf("mn_close() = %d\n", rc);
-        net_test_socket = NULL;
+        if (net_test_socket) {
+            rc = mn_close(net_test_socket);
+            console_printf("mn_close() = %d\n", rc);
+            net_test_socket = NULL;
+        }
         if (net_test_socket2) {
             rc = mn_close(net_test_socket2);
             console_printf("mn_close() = %d\n", rc);
@@ -380,6 +450,31 @@ omgr_app_init(void)
 }
 #endif
 
+#if ETH_UP
+static int
+lwip_nif_up(const char *name)
+{
+    struct netif *nif;
+    err_t err;
+
+    nif = netif_find(name);
+    if (!nif) {
+        return MN_EINVAL;
+    }
+    if (nif->flags & NETIF_FLAG_LINK_UP) {
+        netif_set_up(nif);
+        netif_set_default(nif);
+#if LWIP_IPV6
+        nif->ip6_autoconfig_enabled = 1;
+        netif_create_ip6_linklocal_address(nif, 1);
+#endif
+        err = dhcp_start(nif);
+        return err ? MN_EUNKNOWN : 0;
+    }
+    return 0;
+}
+#endif
+
 /**
  * main
  *
@@ -398,9 +493,18 @@ main(int argc, char **argv)
 
     sysinit();
 
-    console_printf("iptest\n");
+    hal_gpio_init_out(MCU_GPIO_PORTE(0), 0);
+    hal_gpio_init_out(MCU_GPIO_PORTE(1), 0);
+    hal_gpio_init_out(MCU_GPIO_PORTB(8), 0);
+    hal_gpio_init_out(MCU_GPIO_PORTB(9), 0);
+
+    console_printf("iptest - reset reason %d\n", hal_reset_cause());
 
     shell_cmd_register(&net_test_cmd);
+
+#if ETH_UP
+    lwip_nif_up("st1");
+#endif
 
     /*
      * As the last thing, process events from default event queue.
