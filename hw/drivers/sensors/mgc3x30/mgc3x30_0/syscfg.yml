@@ -1,0 +1,123 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+syscfg.defs:
+    MGC3X30_0_NAME:
+        description: >
+            MGC3X30 device name.
+        value: '"mgc3130_0"'
+
+    MGC3X30_0_I2C_BAUDRATE:
+        description: >
+            MGC3X30 I2C clock speed in kHz.
+        value: 400
+        restriction:
+            - MGC3X30_0_I2C_BAUDRATE<=400
+
+    MGC3X30_0_I2C_BUS:
+        description: >
+            I2C interface bus name for MGC3X30.
+        value : '"i2c0"'
+
+    MGC3X30_0_I2C_NUM:
+        description: >
+            I2C interface used for MGC3x30.
+        value: 0
+
+    MGC3X30_0_I2C_ADDR:
+        description: >
+            I2C interface address used for MGC3x30.
+        value: 0x42
+        range: 0x42,0x43
+
+    MGC3X30_0_EIO0_TS_PIN:
+        description: >
+            MGC3X30 EIO0/TS pin.
+        value:
+        restricions:
+            - MGC3X30_0_EIO0_TS_PIN>=0
+
+    MGC3X30_0_EIO1_PIN:
+        description: >
+            MGC3X30 EIO1 pin.
+        value: -1
+
+    MGC3X30_0_EIO2_PIN:
+        description: >
+            MGC3X30 EIO2 pin.
+        value: -1
+
+    MGC3X30_0_EIO3_PIN:
+        description: >
+            MGC3X30 EIO3 pin.
+        value: -1
+
+    MGC3X30_0_EIO4_PIN:
+        description: >
+            MGC3X30 EIO4 pin.
+        value: -1
+
+    MGC3X30_0_NORTH_RX:
+        description: >
+            MGC3X30 RXn pin for north electrode.
+        range: 0..4
+        value: 0
+
+    MGC3X30_0_SOUTH_RX:
+        description: >
+            MGC3X30 RXn pin for south electrode.
+        range: 0..4
+        value: 1
+
+    MGC3X30_0_WEST_RX:
+        description: >
+            MGC3X30 RXn pin for west electrode.
+        range: 0..4
+        value: 2
+
+    MGC3X30_0_EAST_RX:
+        description: >
+            MGC3X30 RXn pin for east electrode.
+        range: 0..4
+        value: 3
+
+    MGC3X30_0_CENTER_RX:
+        description: >
+            MGC3X30 RXn pin for center electrode.
+        range: -1..4
+        value: 4
+
+    MGC3X30_0_RST_PIN:
+        description: >
+            MGC3X30 Reset pin if connected to MCU.
+        value: -1
+
+    MGC3X30_0_MCLR_PIN:
+        description: >
+            MGC3X30 MCLR pin.
+        value: -1
+
+    MGC3X30_0_LOCK_TIMEOUT:
+        description:
+            Timeout for locking device.
+        value: 1000
+
+    MGC3X30_0_SYSINIT_STAGE:
+        description: >
+            Sysinit stage for creation of MGC3X30.
+        value: 200
