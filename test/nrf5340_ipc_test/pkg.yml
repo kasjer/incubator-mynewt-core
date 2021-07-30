@@ -1,0 +1,15 @@
+pkg.name: "test/nrf5340_ipc_test"
+
+pkg.req_apis:
+    - console
+
+pkg.deps:
+    - "@apache-mynewt-core/sys/shell"
+    - "@apache-mynewt-core/hw/drivers/ipc_nrf5340"
+
+pkg.init.MCU_NET_CORE:
+    nrf5340_ipc_net_core_init: 100
+
+pkg.init.MCU_APP_CORE:
+    nrf5340_ipc_app_core_init: 100
+
