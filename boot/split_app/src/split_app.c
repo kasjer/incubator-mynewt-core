@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include "os/mynewt.h"
 
-extern int main(int argc, char **argv);
+extern int mynewt_main(int argc, char **argv);
 
 /**
  * Rudimentary startup function.  Only called in the "application" half of a
