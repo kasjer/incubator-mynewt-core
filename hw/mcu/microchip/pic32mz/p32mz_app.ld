@@ -1522,6 +1522,7 @@ SECTIONS
     *(.mips16.fn.*)
     *(.mips16.call.*)
     *(.gnu.warning)
+    PROVIDE (mynewt_main = main) ;
     . = ALIGN(4) ;
   } >kseg0_program_mem
   /* Global-namespace object initialization */

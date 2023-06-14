@@ -135,3 +135,10 @@ SystemInit(void)
     /* Configure System Clock */
     SystemClock_Config();
 }
+
+//__attribute__((weak)) int
+//mynewt_main(int argc, char **argv)
+//{
+//    extern int main(int argc, char **argv);
+//    main(argc, argv);
+//}
