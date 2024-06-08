@@ -142,7 +142,7 @@ tud_dfu_manifest_cb(uint8_t alt)
      */
     tud_dfu_finish_flashing(DFU_STATUS_OK);
 
-#if MYNEWT_VAL(USBD_DFU_RESET_AFTER_DOWNLOAD)
+#if MYNEWT_VAL(USBD_DFU_RESET_AFTER_DOWNLOAD) && !MYNEWT_VAL(BOOT_LOADER)
     /*
      * Device should reboot after download is complete.
      * It should be done after final DFU_GETSTATUS. But this event is not
