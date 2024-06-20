@@ -19,12 +19,15 @@
 
 #include <os/mynewt.h>
 
+#include <sysflash/sysflash.h>
 #include <class/dfu/dfu_device.h>
 
 #include <bsp/bsp.h>
 #include <img_mgmt/img_mgmt.h>
 #include <tinyusb/tinyusb.h>
 #include <hal/hal_gpio.h>
+#include <hal/hal_nvreg.h>
+#include <tusb.h>
 
 /*
  * If DFU is activated from bootloader it writes to SLOT0.
@@ -182,6 +185,22 @@ boot_preboot(void)
         tinyusb_start();
     }
     hal_gpio_deinit(MYNEWT_VAL(USBD_DFU_BOOT_PIN));
+#elif MYNEWT_VAL(USBD_DFU_BOOT_RESET_COUNT_NVREG) >= 0
+    uint32_t counter = hal_nvreg_read(MYNEWT_VAL(USBD_DFU_BOOT_RESET_COUNT_NVREG));
+    /* If special value is stored in counter register or counter due to reset pin was done number of times start dfu */
+    if (counter == MYNEWT_VAL(USBD_DFU_BOOT_RESET_COUNT_NVREG) ||
+        ((MYNEWT_VAL(USBD_DFU_BOOT_RESET_COUNT) > 0) && counter >= MYNEWT_VAL(USBD_DFU_BOOT_RESET_COUNT))) {
+        hal_nvreg_write(MYNEWT_VAL(USBD_DFU_BOOT_RESET_COUNT_NVREG), 0);
+        tinyusb_start();
+    } else {
+        if (hal_reset_cause() == HAL_RESET_PIN) {
+            /* Reset pin count increment */
+            hal_nvreg_write(MYNEWT_VAL(USBD_DFU_BOOT_RESET_COUNT_NVREG), counter + 1);
+        } else if (counter) {
+            /* Write 0 if not already there */
+            hal_nvreg_write(MYNEWT_VAL(USBD_DFU_BOOT_RESET_COUNT_NVREG), 0);
+        }
+    }
 #endif
 }
 
