@@ -140,6 +140,22 @@ syscfg.defs:
             Set to 2 if boto pin needs internal pull-down resistor.
         value: 0
 
+    MSC_FAT_VIEW_BOOT_RESET_COUNT_NVREG:
+        description: >
+            NVReg number to use for reset counting.
+        value: -1
+    MSC_FAT_VIEW_BOOT_RESET_COUNT:
+        description: >
+            Number of time bootloader must detects reset cause by reset pin before
+            starting dfu bootloader.
+            If this value is unrealistically high, it can be used by the application
+            to force reset into FAT_VIEW bootloader. In this case application simply
+            writes this value to NVREG and does hal_system_reset() to activate
+            bootlaoder.
+            When BSP does not have custom button but has reset button specifying value
+            like 2-3 can be used to go into bootloader
+        value: 0xDEADC0DE
+
 syscfg.vals:
     USBD_MSC: 1
 

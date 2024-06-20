@@ -23,6 +23,7 @@
 #include <bsp/bsp.h>
 #include <sysflash/sysflash.h>
 #include <hal/hal_gpio.h>
+#include <hal/hal_nvreg.h>
 #include <os/util.h>
 #include <tusb.h>
 #include <class/msc/msc.h>
@@ -1472,14 +1473,29 @@ msc_fat_view_pkg_init(void)
     init_disk_data();
 }
 
-#if MYNEWT_VAL(MSC_FAT_BOOT_PIN) >= 0
+#if MYNEWT_VAL(MSC_FAT_BOOT_PIN) >= 0 || MYNEWT_VAL(MSC_FAT_VIEW_BOOT_RESET_COUNT_NVREG) >= 0
 void
 boot_preboot(void)
 {
-    hal_gpio_init_in(MYNEWT_VAL(MSC_FAT_BOOT_PIN), (hal_gpio_pull_t)MYNEWT_VAL(MSC_FAT_BOOT_PIN_PULL));
-    os_cputime_delay_usecs(30);
-    if (hal_gpio_read(MYNEWT_VAL(MSC_FAT_BOOT_PIN)) == MYNEWT_VAL(MSC_FAT_BOOT_PIN_VALUE)) {
+    int start_usb = false;
+    if (MYNEWT_VAL(MSC_FAT_VIEW_BOOT_RESET_COUNT_NVREG)) {
+        uint32_t counter = hal_nvreg_read(MYNEWT_VAL(MSC_FAT_VIEW_BOOT_RESET_COUNT_NVREG));
+        /* If special value is stored in counter register or counter due to reset pin was done number of times start dfu */
+        if (counter == MYNEWT_VAL(MSC_FAT_VIEW_BOOT_RESET_COUNT_NVREG) ||
+            ((MYNEWT_VAL(MSC_FAT_VIEW_BOOT_RESET_COUNT) > 0) && counter >= MYNEWT_VAL(MSC_FAT_VIEW_BOOT_RESET_COUNT))) {
+            hal_nvreg_write(MYNEWT_VAL(MSC_FAT_VIEW_BOOT_RESET_COUNT_NVREG), 0);
+            start_usb = true;
+        } else {
+            hal_nvreg_write(MYNEWT_VAL(MSC_FAT_VIEW_BOOT_RESET_COUNT_NVREG), counter + 1);
+        }
+    }
+    if (!start_usb && MYNEWT_VAL(MSC_FAT_BOOT_PIN) >= 0) {
+        hal_gpio_init_in(MYNEWT_VAL(MSC_FAT_BOOT_PIN), (hal_gpio_pull_t)MYNEWT_VAL(MSC_FAT_BOOT_PIN_PULL));
+        os_cputime_delay_usecs(30);
+        start_usb = hal_gpio_read(MYNEWT_VAL(MSC_FAT_BOOT_PIN)) == MYNEWT_VAL(MSC_FAT_BOOT_PIN_VALUE);
         hal_gpio_deinit(MYNEWT_VAL(MSC_FAT_BOOT_PIN));
+    }
+    if (start_usb) {
 #if MYNEWT_VAL(MSC_FAT_VIEW_COREDUMP_FILES)
         extern void msc_fat_view_coredump_pkg_init(void);
         msc_fat_view_coredump_pkg_init();
@@ -1487,6 +1503,5 @@ boot_preboot(void)
         msc_fat_view_pkg_init();
         tinyusb_start();
     }
-    hal_gpio_deinit(MYNEWT_VAL(MSC_FAT_BOOT_PIN));
 }
 #endif
