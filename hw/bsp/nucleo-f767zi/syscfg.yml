@@ -26,6 +26,14 @@ syscfg.defs:
         description: 'Number of flash sectors for a non-linear STM32 MCU.'
         value: 12
 
+    BSP_FLASH_SPI_BUS:
+        description: 'bus name SPIFLASH is connected to'
+        value: '"spi0"'
+
+    BSP_FLASH_SPI_NAME:
+        description: 'SPIFLASH device name'
+        value: '"spiflash0"'
+
 syscfg.vals:
     MCU_RAM_START: 0x20020000
     MCU_RAM_SIZE: 368K
