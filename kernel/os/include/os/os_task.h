@@ -28,6 +28,7 @@
 #ifndef _OS_TASK_H
 #define _OS_TASK_H
 
+#include <ucontext.h>
 #include "os/os.h"
 #include "os/os_sanity.h"
 #include "os/os_arch.h"
@@ -165,6 +166,10 @@ struct os_task {
     TAILQ_ENTRY(os_task) t_os_list;
     /** Entry for a singly-linked object list. */
     SLIST_ENTRY(os_task) t_obj_list;
+#if 1
+    bool returned;
+    ucontext_t ucontext;
+#endif
 };
 
 /** @cond INTERNAL_HIDDEN */

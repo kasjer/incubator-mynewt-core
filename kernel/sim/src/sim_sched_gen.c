@@ -22,6 +22,8 @@
  * and no-signals).
  */
 
+#include <ucontext.h>
+
 #include "os/mynewt.h"
 
 #include <hal/hal_bsp.h>
@@ -29,6 +31,8 @@
 #ifdef __APPLE__
 #define _XOPEN_SOURCE
 #endif
+
+#define USE_SETJUMP 0
 
 #include <string.h>
 #include <stdio.h>
@@ -64,6 +68,7 @@ sim_switch_tasks(void)
     }
 
     if (t) {
+#if USE_SETJUMP
         sf = (struct stack_frame *) t->t_stackptr;
 
         rc = sim_setjmp(sf->sf_jb);
@@ -71,14 +76,30 @@ sim_switch_tasks(void)
             OS_ASSERT_CRITICAL();
             return;
         }
+#else
+        (void)rc;
+        (void)sf;
+        t->returned = false;
+        getcontext(&t->ucontext);
+        if (!t->returned) {
+            t->returned = true;
+        } else {
+            OS_ASSERT_CRITICAL();
+            return;
+        }
+#endif
     }
 
     os_sched_ctx_sw_hook(next_t);
 
     os_sched_set_current_task(next_t);
 
+#if USE_SETJUMP
     sf = (struct stack_frame *) next_t->t_stackptr;
     sim_longjmp(sf->sf_jb, 1);
+#else
+    setcontext(&next_t->ucontext);
+#endif
 }
 
 void
@@ -178,6 +199,7 @@ sim_task_start(struct stack_frame *sf, int rc)
 os_stack_t *
 sim_task_stack_init(struct os_task *t, os_stack_t *stack_top, int size)
 {
+#if USE_SETJUMP
     struct stack_frame *sf;
 
     sf = (struct stack_frame *) ((uint8_t *) stack_top - sizeof(*sf));
@@ -186,6 +208,15 @@ sim_task_stack_init(struct os_task *t, os_stack_t *stack_top, int size)
     os_arch_frame_init(sf);
 
     return ((os_stack_t *)sf);
+#else
+//    t->ucontext.uc_stack = &t->stack;
+    memset(&t->ucontext, 0, sizeof(t->ucontext));
+    t->ucontext.uc_stack.ss_sp = stack_top - size;
+    t->ucontext.uc_stack.ss_size = size;
+    getcontext(&t->ucontext);
+    makecontext(&t->ucontext, (void (*)(void))t->t_func, 1, t->t_arg);
+    return stack_top;
+#endif
 }
 
 os_error_t
@@ -210,8 +241,13 @@ sim_os_start(void)
 
     g_os_started = 1;
 
+#if USE_SETJUMP
     sf = (struct stack_frame *) t->t_stackptr;
     sim_longjmp(sf->sf_jb, 1);
+#else
+    (void)sf;
+    setcontext(&t->ucontext);
+#endif
 
     return 0;
 }
