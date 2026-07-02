@@ -91,11 +91,22 @@
  */
 #define LINK_TABLE_ELEMENT_TYPE(table_name) table_name##_element_t
 /* Macro to create symbol attribute for table */
+#if __APPLE__
+#define LINK_TABLE_SECTION(table_name)                                        \
+    __attribute__((section("__TEXT," #table_name), used))
+#define LINK_TABLE_ELEMENT_SECTION(table_name, elem)                          \
+    LINK_TABLE_SECTION(table_name)
+#undef LINK_TABLE_START
+#undef LINK_TABLE_END
+#define LINK_TABLE_START(table_name) section$start$__TEXT$##table_name
+#define LINK_TABLE_END(table_name) section$end$__TEXT$##table_name
+#else
 #define LINK_TABLE_SECTION(table_name)                                        \
     __attribute__((section("." #table_name), used))
 /* Macro to create attribute for table with name that may affect order of elements */
 #define LINK_TABLE_ELEMENT_SECTION(table_name, elem)                          \
     __attribute__((section("." #table_name "." #elem), used))
+#endif
 /* Macro to create element that goes to link table.
  * It could be used like this:
  * LINK_TABLE_ELEMENT(example1_table, foo5) = {
