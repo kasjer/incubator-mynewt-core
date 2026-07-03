@@ -428,10 +428,10 @@ void conf_lock(void);
 void conf_unlock(void);
 
 typedef struct conf_handler *conf_handler_t;
-LINK_TABLE(struct conf_handler *, static_conf_handlers);
+LINK_TABLE(struct conf_handler *, _conf_handlers);
 
 #define STATIC_CONF_HANDLER(handler)                                          \
-    LINK_TABLE_ELEMENT_REF(static_conf_handlers, handler, handler);
+    LINK_TABLE_ELEMENT_REF(_conf_handlers, handler, handler);
 
 #ifdef __cplusplus
 }

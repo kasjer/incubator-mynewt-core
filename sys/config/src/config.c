@@ -34,8 +34,8 @@ struct conf_handler_head conf_handlers;
 static struct os_mutex conf_mtx;
 
 #if __APPLE__
-__attribute__((used, section("__TEXT,static_conf_handlers")))
-const LINK_TABLE_ELEMENT_TYPE(static_conf_handlers) static_conf_handlers_anchor[0];
+__attribute__((used, section("__TEXT,_conf_handlers")))
+const LINK_TABLE_ELEMENT_TYPE(_conf_handlers) _conf_handlers_anchor[0];
 #endif
 
 #if MYNEWT_VAL(OS_SCHEDULING)
@@ -113,7 +113,7 @@ conf_handler_lookup(char *name)
     struct conf_handler *ch;
 
     if (MYNEWT_VAL(CONFIG_HANDLERS_STATIC)) {
-        LINK_TABLE_FOREACH(h, static_conf_handlers) {
+        LINK_TABLE_FOREACH(h, _conf_handlers) {
             if (!strcmp(name, (*h)->ch_name)) {
                 return *h;
             }
@@ -430,7 +430,7 @@ conf_export(conf_export_func_t export_func, enum conf_export_tgt tgt)
 
     conf_lock();
     if (MYNEWT_VAL(CONFIG_HANDLERS_STATIC)) {
-        LINK_TABLE_FOREACH(h, static_conf_handlers) {
+        LINK_TABLE_FOREACH(h, _conf_handlers) {
             conf_export_cb(*h, export_func, tgt);
         }
     }
@@ -512,7 +512,7 @@ conf_commit(char *name)
     } else {
         rc = 0;
         if (MYNEWT_VAL(CONFIG_HANDLERS_STATIC)) {
-            LINK_TABLE_FOREACH(h, static_conf_handlers) {
+            LINK_TABLE_FOREACH(h, _conf_handlers) {
                 if ((*h)->ch_commit) {
                     rc2 = conf_commit_cb(*h);
                     if (!rc) {

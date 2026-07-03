@@ -305,7 +305,7 @@ conf_save(void)
     }
     rc = 0;
     if (MYNEWT_VAL(CONFIG_HANDLERS_STATIC)) {
-        LINK_TABLE_FOREACH(h, static_conf_handlers) {
+        LINK_TABLE_FOREACH(h, _conf_handlers) {
             rc2 = conf_export_cb(*h, conf_store_one, CONF_EXPORT_PERSIST);
             if (!rc) {
                 rc = rc2;
