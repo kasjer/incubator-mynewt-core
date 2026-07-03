@@ -33,6 +33,11 @@ struct conf_handler_head conf_handlers;
 
 static struct os_mutex conf_mtx;
 
+#if __APPLE__
+__attribute__((used, section("__TEXT,static_conf_handlers")))
+const LINK_TABLE_ELEMENT_TYPE(static_conf_handlers) static_conf_handlers_anchor[0];
+#endif
+
 #if MYNEWT_VAL(OS_SCHEDULING)
 static os_event_fn conf_ev_fn_load;
 
