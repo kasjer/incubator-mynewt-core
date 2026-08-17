@@ -37,6 +37,7 @@ struct stm32_eth_cfg {
         LAN_8742_RMII
     } sec_phy_type;
     int sec_phy_irq;
+    int sec_phy_rst_pin;
     uint8_t sec_phy_addr;
 };
 

@@ -503,6 +503,13 @@ stm32_lwip_init(struct netif *nif)
 
     cfg = ses->cfg;
 
+    if (cfg->sec_phy_rst_pin >= 0) {
+        hal_gpio_init_out(cfg->sec_phy_rst_pin, 1);
+        os_cputime_delay_usecs(10);
+        hal_gpio_write(cfg->sec_phy_rst_pin, 0);
+        os_cputime_delay_usecs(10);
+        hal_gpio_write(cfg->sec_phy_rst_pin, 1);
+    }
     /*
      * Now take the BSP specific HW config and set up the hardware.
      */
